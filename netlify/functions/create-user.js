@@ -16,11 +16,11 @@ const db = mysql.createPool({
 export const handler = async (event) => {
     try {
         const body = JSON.parse(event.body);
-        const username = body.username;
+        const { username, email, password } = body;
         
         // Check if the user already exists in the database
         const existingUser = await new Promise((resolve, reject) => {
-            db.query('SELECT * FROM users WHERE username=?', [username],
+            db.query('SELECT * FROM users WHERE username=? OR email=?', [username, email],
                 function (err, results, fields) {
                     if (err) {
                         reject(err);
@@ -35,12 +35,12 @@ export const handler = async (event) => {
             // User already exists, return an error
             return {
                 statusCode: 409,
-                body: JSON.stringify({ message: "Username already exists" })
+                body: JSON.stringify({ message: "Username or Email already exists" })
             };
         } else {
             // Insert the new user into the database
             const newUser = await new Promise((resolve, reject) => {
-                db.query('INSERT INTO users (username) VALUES (?)', [username],
+                db.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', [username, email, password],
                     function (err, results, fields) {
                         if (err) {
                             reject(err);
