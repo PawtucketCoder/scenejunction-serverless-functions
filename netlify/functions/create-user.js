@@ -38,9 +38,14 @@ export const handler = async (event) => {
                 body: JSON.stringify({ message: "Username or Email already exists" })
             };
         } else {
-            // Insert the new user into the database
+            // Get the current date and time in MySQL compatible format
+            const currentDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+
+            // Insert the new user into the database along with created_date and modified_date
             const newUser = await new Promise((resolve, reject) => {
-                db.query('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', [username, email, password],
+                db.query(
+                    'INSERT INTO users (username, email, password, created_date, modified_date) VALUES (?, ?, ?, ?, ?)',
+                    [username, email, password, currentDate, currentDate],
                     function (err, results, fields) {
                         if (err) {
                             reject(err);
